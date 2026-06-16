@@ -17,9 +17,12 @@ interface ServiceItem {
   slug: string;
 }
 
+const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@kswtechzone.com';
+const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+977-9863198323';
+
 const contactInfo = [
-  { icon: Mail, label: 'Email', value: 'info@kswtechzone.com', href: 'mailto:kswtechzone@gmail.com' },
-  { icon: Phone, label: 'Phone', value: '+977-9863198323', href: 'tel:+9779863198323' },
+  { icon: Mail, label: 'Email', value: contactEmail, href: `mailto:${contactEmail}` },
+  { icon: Phone, label: 'Phone', value: contactPhone, href: `tel:${contactPhone.replace(/[^+\d]/g, '')}` },
   { icon: MapPin, label: 'Location', value: 'Kathmandu, Nepal', href: '#' },
   { icon: Clock, label: 'Hours', value: 'Sun-Fri: 9AM-6PM NPT' },
 ];

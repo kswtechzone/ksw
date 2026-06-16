@@ -1,4 +1,4 @@
-# VPS Deployment Guide — Ubuntu (No Docker)
+# VPS Deployment Guide — Ubuntu
 
 ## 1. System Update & Dependencies
 
@@ -14,7 +14,6 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 node -v   # v20.x
 
-# Install pnpm globally
 corepack enable && corepack prepare pnpm@latest --activate
 pnpm -v
 ```
@@ -29,7 +28,6 @@ sudo -u postgres psql -c "CREATE USER ksw WITH PASSWORD 'your_strong_password';"
 sudo -u postgres psql -c "CREATE DATABASE ksw_website OWNER ksw;"
 sudo -u postgres psql -c "ALTER USER ksw CREATEDB;"
 
-# Allow password auth for local connections
 sudo sed -i 's/local\s\+all\s\+all\s\+peer/local   all             all                                     md5/' /etc/postgresql/16/main/pg_hba.conf
 sudo systemctl restart postgresql
 ```
@@ -47,9 +45,8 @@ cat > .env << 'EOF'
 # Database
 DATABASE_URL="postgresql://ksw:your_strong_password@localhost:5432/ksw_website"
 
-# JWT (use a real random secret)
+# JWT
 JWT_SECRET="generate-with-openssl-rand-64-hex"
-ADMIN_SECRET="generate-another-random-secret"
 
 # Next.js
 NEXT_PUBLIC_APP_URL="https://kswtechzone.com"
@@ -57,29 +54,25 @@ NEXT_PUBLIC_API_URL="/api"
 NODE_ENV=production
 PORT=3000
 
-# Admin credentials (first-run only)
-ADMIN_EMAIL="admin@kswtechzone.com"
-ADMIN_PASSWORD="change-me-on-first-login"
-
-# EmailJS (contact form)
-NEXT_PUBLIC_EMAILJS_SERVICE_ID=""
-NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=""
-NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=""
-EMAILJS_PRIVATE_KEY=""
-
-# Email (nodemailer — newsletter, notifications)
-SMTP_HOST=""
+# SMTP — single Nodemailer for all outgoing email
+SMTP_HOST="smtp.gmail.com"
 SMTP_PORT=587
-SMTP_USER=""
-SMTP_PASS=""
-CONTACT_EMAIL="contact@kswtechzone.com"
+SMTP_USER="techzoneksw@gmail.com"
+SMTP_PASS="your-app-password"
+SMTP_FROM="KSW TechZone <techzoneksw@gmail.com>"
+
+# Admin alert email (receives contact form notifications)
+ADMIN_EMAIL="er.sanjayks@gmail.com"
+
+# Public contact info (shown on contact page — should match where you want inquiries)
+NEXT_PUBLIC_CONTACT_EMAIL="hello@kswtechzone.com"
+NEXT_PUBLIC_CONTACT_PHONE="+977-9863198323"
 EOF
 
 pnpm install
 npx prisma generate
 npx prisma migrate deploy
 
-# Seed initial admin (optional)
 pnpm db:seed
 ```
 
@@ -147,7 +140,6 @@ sudo systemctl restart nginx
 
 ```bash
 sudo certbot --nginx -d kswtechzone.com -d www.kswtechzone.com
-# Auto-renewal is enabled by default; test with:
 sudo certbot renew --dry-run
 ```
 
@@ -174,6 +166,18 @@ pnpm run build
 pm2 restart ksw-techzone
 ```
 
+## Email Architecture
+
+The app uses a **single Nodemailer** instance (configured via `SMTP_*` env vars) for all outgoing email:
+
+| Purpose | Destination | Configuration |
+|---------|------------|---------------|
+| Admin login verification | User's email | `sendVerificationCode()` via SMTP |
+| Contact form notification | `ADMIN_EMAIL` | `sendContactNotification()` via SMTP, reply-to set to submitter |
+| Public contact display | Shown on page | `NEXT_PUBLIC_CONTACT_EMAIL` (env var) |
+
+No third-party email service (EmailJS, SendGrid, etc.) is needed — everything routes through the single SMTP transport.
+
 ## Useful Commands
 
 ```bash
@@ -195,7 +199,7 @@ psql -U ksw -d ksw_website < backup.sql
 ## Security Checklist
 
 - [ ] All secrets in `.env` — never commit
-- [ ] JWT_SECRET generated with `openssl rand -hex 64`
+- [ ] `JWT_SECRET` generated with `openssl rand -hex 64`
 - [ ] PostgreSQL port (5432) blocked by UFW — only local access
 - [ ] SSH key-only authentication (`/etc/ssh/sshd_config`)
 - [ ] Fail2ban running: `sudo systemctl status fail2ban`
