@@ -9,7 +9,6 @@ const nextConfig = {
       's.gravatar.com',
     ],
   },
-  output: 'standalone',
 };
 
 export default nextConfig;

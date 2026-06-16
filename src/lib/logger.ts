@@ -18,7 +18,7 @@ const pinoOptions: pino.LoggerOptions = {
 
 function createStreams(): pino.StreamEntry[] {
   const streams: pino.StreamEntry[] = [
-    { stream: pino.transport({ target: 'pino/file', options: { destination: 1 } }) },
+    { stream: pino.destination(1) },
   ];
 
   if (process.env.NODE_ENV === 'production') {
