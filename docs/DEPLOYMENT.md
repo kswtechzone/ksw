@@ -86,8 +86,10 @@ pnpm run build
 ## 6. Install pm2 & Start App
 
 ```bash
-npm install -g pm2
+sudo npm install -g pm2
 
+#for specific port
+#pm2 start node_modules/next/dist/bin/next --name "ksw-techzone" -- start -p 3008
 pm2 start pnpm --name ksw-techzone -- start
 pm2 save
 pm2 startup   # prints a command — run it to enable on reboot
