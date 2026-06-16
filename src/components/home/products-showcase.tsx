@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
+import { TiltCard } from '@/components/ui/tilt-card';
 import {
   Building2,
   Clock,
@@ -83,8 +84,9 @@ export function ProductsShowcase() {
                 <motion.div
                   key={product.id}
                   variants={cardVariants}
-                  className={`card-3d-static group relative rounded-xl border bg-card/50 backdrop-blur-lg p-6 hover:shadow-xl hover:shadow-ksw-500/5 hover:-translate-y-2 ${idx >= 3 ? 'hidden sm:block' : ''}`}
+                  className={`${idx >= 3 ? 'hidden sm:block' : ''}`}
                 >
+                  <TiltCard className="group relative rounded-xl border bg-card/50 backdrop-blur-lg p-6 hover:shadow-xl hover:shadow-ksw-500/5">
                   <div className="flex items-start justify-between mb-4">
                     <div className="h-12 w-12 rounded-lg bg-ksw-500/10 flex items-center justify-center">
                       <Icon className="h-6 w-6 text-ksw-500" />
@@ -121,6 +123,7 @@ export function ProductsShowcase() {
                       <ExternalLink className="ml-1 h-3 w-3 transition-transform group-hover/btn:translate-x-0.5" />
                     </Link>
                   </Button>
+                  </TiltCard>
                 </motion.div>
               );
             })}

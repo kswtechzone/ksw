@@ -59,7 +59,7 @@ export default function AboutPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
+            className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-4xl sm:text-5xl font-bold mb-6">
               About <span className="text-primary">KSW TechZone</span>

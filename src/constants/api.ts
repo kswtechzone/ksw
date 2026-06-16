@@ -19,4 +19,6 @@ export const API = {
   PRODUCTS: `${API_BASE}/api/products`,
   UPLOAD: `${API_BASE}/api/upload`,
   TIMELINE: `${API_BASE}/api/timeline`,
+  PRICING: `${API_BASE}/api/pricing`,
+  PRICING_BY_SERVICE: (serviceSlug: string) => `${API_BASE}/api/pricing/service/${serviceSlug}`,
 };

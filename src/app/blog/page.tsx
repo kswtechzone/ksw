@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { TiltCard } from '@/components/ui/tilt-card';
 import { Search, Calendar, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,8 +90,9 @@ export default function BlogPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="card-3d-static group rounded-xl border bg-card hover:shadow-lg overflow-hidden"
+                  className="group"
                 >
+                  <TiltCard className="rounded-xl border bg-card hover:shadow-lg overflow-hidden">
                   {post.image && (
                     <div className="aspect-video bg-muted overflow-hidden">
                       <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -117,6 +119,7 @@ export default function BlogPage() {
                       Read More <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
+                  </TiltCard>
                 </motion.article>
               ))}
             </div>

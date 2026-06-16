@@ -16,35 +16,6 @@ services:
     networks:
       - ksw-network
 
-  redis:
-    image: redis:7-alpine
-    container_name: ksw-redis
-    restart: unless-stopped
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis_data:/data
-    networks:
-      - ksw-network
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: ksw-backend
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-ksw}:${POSTGRES_PASSWORD:-ksw_password}@postgres:5432/${POSTGRES_DB:-ksw_website}
-      REDIS_URL: redis://redis:6379
-    ports:
-      - '4000:4000'
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - ksw-network
-
   frontend:
     build:
       context: .
@@ -58,7 +29,6 @@ services:
       - '3000:3000'
     depends_on:
       - postgres
-      - redis
     networks:
       - ksw-network
 
@@ -76,7 +46,6 @@ services:
       - certbot_data:/var/www/certbot
     depends_on:
       - frontend
-      - backend
     networks:
       - ksw-network
 
@@ -92,7 +61,6 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
   certbot_data:
 
 networks:

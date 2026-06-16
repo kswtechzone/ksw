@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
+import { TiltCard } from '@/components/ui/tilt-card';
 import {
   Code2,
   Globe,
@@ -95,8 +96,9 @@ export function ServicesOverview() {
                 <motion.div
                   key={id}
                   variants={cardVariants}
-                  className={`card-3d-static group relative rounded-xl border bg-card/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-ksw-500/5 hover:-translate-y-1 ${idx >= 3 ? 'hidden sm:block' : ''}`}
+                  className={`${idx >= 3 ? 'hidden sm:block' : ''}`}
                 >
+                  <TiltCard className="group relative rounded-xl border bg-card/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-ksw-500/5">
                   <div className="h-12 w-12 rounded-lg bg-ksw-500/10 flex items-center justify-center mb-4 group-hover:bg-ksw-500/20 transition-colors">
                     <Icon className="h-6 w-6 text-ksw-500" />
                   </div>
@@ -110,6 +112,7 @@ export function ServicesOverview() {
                       <ExternalLink className="ml-1 h-3 w-3" />
                     </Link>
                   </Button>
+                  </TiltCard>
                 </motion.div>
               );
             })}

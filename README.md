@@ -41,7 +41,8 @@ Enterprise-grade corporate website and centralized authentication ecosystem for 
 - Blog with categories, tags, search
 - Careers with job listings
 - Portfolio with filtering
-- Contact form
+- Contact form with multi-plan selection & localStorage persistence
+- Interactive tic-tac-toe game with minimax AI on the home page
 
 ### KSW Account (SSO)
 - Role-based access control (RBAC)

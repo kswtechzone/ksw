@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileText, Briefcase, Users, Settings, HelpCircle,
-  Menu, X, LogOut, ChevronRight, FolderKanban, Wrench, UserCheck, Package, Clock,
+  Menu, X, LogOut, ChevronRight, FolderKanban, Wrench, UserCheck, Package, Clock, TrendingUp,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { API } from '@/constants/api';
@@ -20,6 +20,7 @@ const navItems = [
   { href: '/admin/faqs', label: 'FAQ', icon: HelpCircle },
   { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/admin/job-applications', label: 'Applications', icon: UserCheck },
+  { href: '/admin/pricing', label: 'Pricing', icon: TrendingUp },
   { href: '/admin/timeline', label: 'Timeline', icon: Clock },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];

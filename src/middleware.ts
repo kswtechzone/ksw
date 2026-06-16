@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limiter';
-import logger from '@/lib/logger';
 
 const publicPaths = [
   '/',
@@ -25,6 +24,7 @@ const publicPaths = [
   '/api/settings',
   '/api/job-applications',
   '/api/products',
+  '/api/pricing',
   '/api/admin',
   '/api/upload',
   '/favicon.ico',
@@ -108,7 +108,7 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-RateLimit-Reset', String(Math.ceil(rateResult.resetAt / 1000)));
 
   if (!rateResult.allowed) {
-    logger.warn({ method: request.method, path: pathname, status: 429, duration: Math.round(performance.now() - start), ip, ua: request.headers.get('user-agent') || '' }, 'Rate limit exceeded');
+    console.warn(JSON.stringify({ level: 'warn', method: request.method, path: pathname, status: 429, duration: Math.round(performance.now() - start), ip, ua: request.headers.get('user-agent') || '', time: new Date().toISOString() }));
     return new NextResponse('Too Many Requests', {
       status: 429,
       headers: {
@@ -116,6 +116,10 @@ export async function middleware(request: NextRequest) {
         ...Object.fromEntries(response.headers.entries()),
       },
     });
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`${request.method} ${pathname} ${response.status} ${Math.round(performance.now() - start)}ms`);
   }
 
   const isPublic = publicPaths.some(
@@ -129,8 +133,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
   }
-
-  logger.info({ method: request.method, path: pathname, status: response.status, duration: Math.round(performance.now() - start), ip, rate: rateResult.remaining, ua: request.headers.get('user-agent') || '' });
 
   return response;
 }

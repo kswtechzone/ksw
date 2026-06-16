@@ -2,12 +2,11 @@
 
 ## Overview
 
-KSW TechZone is built as a modern, scalable monorepo containing:
-- Next.js 14 frontend with App Router
-- NestJS backend microservices  
-- PostgreSQL database with Prisma ORM
-- Redis for caching
-- Docker containerization
+KSW TechZone is a modern Next.js 14 application (App Router) with:
+- **API Routes** under `src/app/api/` — all backend logic lives here
+- **Prisma ORM** connected to PostgreSQL
+- **Nginx** reverse proxy with SSL termination
+- **Docker** containerization for production
 
 ## Architecture Diagram
 
@@ -19,26 +18,21 @@ KSW TechZone is built as a modern, scalable monorepo containing:
 ┌──────────────────────────▼──────────────────────────────────┐
 │                      Nginx Reverse Proxy                     │
 │                       kswtechzone.com                        │
-└───────┬──────────────────────────────────┬──────────────────┘
-        │                                  │
-┌───────▼────────┐                 ┌───────▼────────┐
-│   Next.js App   │                 │  NestJS API    │
-│   :3000         │                 │  :4000         │
-│                 │                 │                │
-│  • SSR/ISR      │                 │  • Auth        │
-│  • API Routes   │                 │  • Users       │
-│  • JWT Auth     │                 │  • Blog        │
-│  • Framer Motion│                 │  • Notify      │
-└───────┬─────────┘                 └───────┬─────────┘
-        │                                  │
-┌───────▼──────────────────────────────────▼─────────────────┐
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│                       Next.js App                            │
+│                        :3000                                 │
+│                                                              │
+│  • App Router (SSR/SSG/ISR)                                  │
+│  • API Routes (auth, blog, contact, etc.)                    │
+│  • Prisma ORM → PostgreSQL                                   │
+│  • JWT Auth with jose                                       │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
 │                    PostgreSQL Database                       │
 │  users | accounts | sessions | blogs | portfolios | jobs    │
-└─────────────────────────────────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────┐
-│                        Redis Cache                           │
-│              Sessions | Rate Limiting | Caching              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -46,7 +40,7 @@ KSW TechZone is built as a modern, scalable monorepo containing:
 
 ### Roles
 - **USER** - Default role for registered users
-- **VENDOR** - Service providers (hotels, restaurants)
+- **VENDOR** - Service providers
 - **MANAGER** - Platform managers with elevated permissions
 - **ADMIN** - System administrators
 - **SUPER_ADMIN** - Full system access
@@ -54,5 +48,4 @@ KSW TechZone is built as a modern, scalable monorepo containing:
 ### Permission Strategy
 - Roles are stored in user metadata
 - Roles are included in JWT tokens as custom claims
-- NestJS middleware extracts roles from tokens
-- Route guards check role requirements before allowing access
+- API route handlers verify roles before processing requests

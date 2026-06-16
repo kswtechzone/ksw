@@ -5,7 +5,7 @@ import { apiHandler, createApiError } from '@/lib/api-handler';
 
 export const POST = apiHandler(async (req: Request) => {
   const body = await req.json();
-  const { name, email, service, message } = body;
+  const { name, email, phone, service, message } = body;
 
   if (!name || !email || !message) {
     throw createApiError('Missing required fields', 400);
@@ -15,6 +15,7 @@ export const POST = apiHandler(async (req: Request) => {
     data: {
       name,
       email,
+      phone: phone || null,
       service,
       message,
       status: 'unread',

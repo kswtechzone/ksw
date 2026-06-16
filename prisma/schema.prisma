@@ -310,6 +310,8 @@ model Service {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  pricingPlans PricingPlan[]
+
   @@map("services")
 }
 
@@ -325,6 +327,29 @@ model TimelineEvent {
   updatedAt   DateTime @updatedAt
 
   @@map("timeline_events")
+}
+
+model PricingPlan {
+  id            String   @id @default(uuid())
+  name          String
+  serviceId     String?
+  category      String   @default("Digital Marketing")
+  price         Float
+  originalPrice Float?
+  billingPeriod String   @default("monthly")
+  currency      String   @default("NPR")
+  description   String?
+  features      String[]
+  highlighted   Boolean  @default(false)
+  popular       Boolean  @default(false)
+  order         Int      @default(0)
+  published     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@map("pricing_plans")
 }
 
 model FAQ {

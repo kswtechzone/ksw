@@ -13,50 +13,28 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
+
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-<<<<<<< HEAD
-        node-version: '22'
-=======
         node-version: '20'
->>>>>>> f75a133 (next)
-        cache: 'npm'
+        cache: 'pnpm'
 
     - name: Install dependencies
-      run: npm install
-<<<<<<< HEAD
-      
-    - name: Initiating Prisma Client
-      run: npx prisma init
-      
-    - name: installing dev dependencies
-      run: npm install dotenv
-      
-=======
+      run: pnpm install
 
->>>>>>> f75a133 (next)
     - name: Generate Prisma Client
       run: npx prisma generate
 
     - name: Run lint
-      run: npm run lint
+      run: pnpm run lint
 
     - name: Build
-      run: npm run build
+      run: pnpm run build
       env:
-<<<<<<< HEAD
-        DATABASE_URL: "postgresql://kswusa:Pinky_12##@65.109.25.210:5432/kswusa1"
-        JWT_SECRET: "dummy_secret_for_ci"
-    - name: Deploy to cPanel via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: 65.109.25.210
-        username: kswusa@kswtechnology.com.np
-        password: Pinky_12##
-        local-dir: ./dist/
-        server-dir: ${{ secrets.FTP_SERVER_DIR }}
-=======
         DATABASE_URL: "postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
         JWT_SECRET: "dummy_secret_for_ci"
->>>>>>> f75a133 (next)

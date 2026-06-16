@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TiltCard } from '@/components/ui/tilt-card';
 import { ExternalLink, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -86,8 +87,9 @@ export default function PortfolioPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="card-3d-static group rounded-xl border bg-card overflow-hidden hover:shadow-lg"
+                  className="group"
                 >
+                  <TiltCard className="rounded-xl border bg-card overflow-hidden hover:shadow-lg">
                   <div className="aspect-video bg-gradient-to-br from-ksw-500/10 to-background flex items-center justify-center">
                     <span className="text-4xl font-bold text-ksw-500/20">
                       {project.title.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
@@ -125,6 +127,7 @@ export default function PortfolioPage() {
                       )}
                     </div>
                   </div>
+                  </TiltCard>
                 </motion.div>
               ))}
             </motion.div>

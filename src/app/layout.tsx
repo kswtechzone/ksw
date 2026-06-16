@@ -5,6 +5,8 @@ import { ThemeProvider } from '@/components/ui/theme-provider';
 import { NavbarWrapper } from '@/components/layout/navbar-wrapper';
 import { Footer } from '@/components/layout/footer';
 import { JsonLd } from '@/components/JsonLd';
+import { CursorGlow } from '@/components/ui/cursor-glow';
+import { ParticleField } from '@/components/ui/particle-field';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -94,11 +96,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <ParticleField />
           <div className="relative min-h-screen flex flex-col">
             <NavbarWrapper />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <CursorGlow />
         </ThemeProvider>
       </body>
     </html>

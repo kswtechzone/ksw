@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Clock, Send, Loader2, Check, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, Loader2, Check, CheckCircle2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,17 +24,39 @@ const contactInfo = [
   { icon: Clock, label: 'Hours', value: 'Sun-Fri: 9AM-6PM NPT' },
 ];
 
+function parsePreselectedServices(): { preselected: string[]; custom: string[]; plans: string[] } {
+  if (typeof window === 'undefined') return { preselected: [], custom: [], plans: [] };
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get('services');
+  const rawPlans = params.get('plans');
+  const plan = params.get('plan');
+  const all = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const plans = rawPlans ? rawPlans.split(',').map(s => s.trim()).filter(Boolean) : [];
+  if (plan && !all.includes(plan)) all.push(plan);
+  return { preselected: all, custom: [], plans };
+}
+
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [services, setServices] = React.useState<ServiceItem[]>([]);
   const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
+  const [selectedPlans, setSelectedPlans] = React.useState<string[]>([]);
   const [sent, setSent] = React.useState(false);
+  const customInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     fetch(API.SERVICES)
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setServices(data); })
       .catch(() => {});
+
+    const { preselected, plans } = parsePreselectedServices();
+    if (preselected.length > 0) {
+      setSelectedServices(preselected);
+    }
+    if (plans.length > 0) {
+      setSelectedPlans(plans);
+    }
   }, []);
 
   const toggleService = (title: string) => {
@@ -45,16 +67,35 @@ export default function ContactPage() {
     );
   };
 
+  const addCustomService = (value: string) => {
+    const val = value.trim();
+    if (val && !selectedServices.includes(val)) {
+      setSelectedServices(prev => [...prev, val]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const form = e.currentTarget;
+    const formData = new FormData(form);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string;
+    const message = formData.get('message') as string;
+
+    const serviceNames = services.map(s => s.title);
+    const preselected = selectedServices.filter(s => serviceNames.includes(s));
+    const custom = selectedServices.filter(s => !serviceNames.includes(s));
+    const serviceJson = JSON.stringify({ preselected, custom });
+
     const data = {
-      name: (form.elements.namedItem('name') as HTMLInputElement).value,
-      email: (form.elements.namedItem('email') as HTMLInputElement).value,
-      service: selectedServices.join(', ') || undefined,
-      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+      name,
+      email,
+      phone: phone || undefined,
+      service: serviceJson,
+      message,
     };
 
     try {
@@ -136,12 +177,12 @@ export default function ContactPage() {
                   className="text-center py-16 px-6 rounded-2xl border bg-card"
                 >
                   <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-6" />
-                  <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
+                  <h3 className="text-2xl font-bold mb-2">Quote Request Sent!</h3>
                   <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
-                    Thank you for reaching out. We&apos;ll review your message and get back to you within 24 hours.
+                    Thank you for reaching out. We&apos;ll review your requirements and get back to you within 24 hours.
                   </p>
                   <Button variant="outline" size="lg" onClick={() => setSent(false)}>
-                    Send Another Message
+                    Send Another Request
                   </Button>
                 </motion.div>
               ) : (
@@ -157,10 +198,26 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="phone">Phone (optional)</Label>
+                    <Input id="phone" name="phone" type="tel" placeholder="+977-98XXXXXXXX" />
+                  </div>
+
+                  <div className="space-y-3">
+                    {selectedPlans.length > 0 && (
+                      <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
+                        <p className="text-sm font-semibold mb-2">Selected Plans</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedPlans.map(p => (
+                            <span key={p} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm border border-primary/20">
+                              {p}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <Label>Services Interested In</Label>
-                    {services.length === 0 ? (
-                      <Input id="service" name="service" placeholder="Web Development, Mobile App, etc." />
-                    ) : (
+                    {services.length > 0 && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {services.map((s) => {
                           const selected = selectedServices.includes(s.title);
@@ -188,17 +245,71 @@ export default function ContactPage() {
                         })}
                       </div>
                     )}
+
+                    <div className="flex gap-2">
+                      <input
+                        ref={customInputRef}
+                        type="text"
+                        placeholder="Add custom service (e.g. Logo Design, API Integration)"
+                        className="flex-1 px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm bg-background"
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addCustomService(e.currentTarget.value);
+                            e.currentTarget.value = '';
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (customInputRef.current) {
+                            addCustomService(customInputRef.current.value);
+                            customInputRef.current.value = '';
+                          }
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+
+                    {selectedServices.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedServices.map(s => (
+                          <span
+                            key={s}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm ${
+                              services.some(svc => svc.title === s)
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-muted text-muted-foreground border border-dashed border-muted-foreground/30'
+                            }`}
+                          >
+                            {s}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedServices(prev => prev.filter(x => x !== s))}
+                              className="hover:opacity-60 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
                       name="message"
-                      placeholder="Tell us about your project..."
+                      placeholder="Tell us about your project, budget, timeline..."
                       rows={5}
                       required
                     />
                   </div>
+
                   <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <>
@@ -208,7 +319,7 @@ export default function ContactPage() {
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Send Message
+                        {selectedServices.length > 0 ? 'Send Quote Request' : 'Send Message'}
                       </>
                     )}
                   </Button>
