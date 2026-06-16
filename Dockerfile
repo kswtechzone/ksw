@@ -1,11 +1,15 @@
 FROM node:20-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+FROM base AS deps
+WORKDIR /app
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
+COPY packages/auth/package.json ./packages/auth/
+RUN pnpm fetch
+
 FROM base AS builder
 WORKDIR /app
-COPY pnpm-lock.yaml package.json ./
-RUN pnpm fetch
-COPY prisma/ prisma/
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm install --offline
 RUN npx prisma generate
@@ -22,7 +26,10 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules/.pnpm/@prisma+*/node_modules/@prisma ./node_modules/@prisma
+
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
 EXPOSE 3000

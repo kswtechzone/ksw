@@ -1,151 +1,95 @@
-# VPS Deployment Guide — Ubuntu
+# VPS Deployment Guide — Ubuntu (Docker)
 
-## 1. System Update & Dependencies
+## Prerequisites
+
+- Ubuntu 22.04+ VPS with root/sudo access
+- Domain `kswtechzone.com` pointing to the server IP
+- Ports 22, 80, 443 open in the firewall
+
+---
+
+## 1. System Setup
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl git nginx certbot python3-certbot-nginx postgresql postgresql-contrib ufw fail2ban
+sudo apt install -y curl git ufw fail2ban
 ```
 
-## 2. Install Node.js 20 + pnpm
+## 2. Install Docker
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-node -v   # v20.x
-
-corepack enable && corepack prepare pnpm@latest --activate
-pnpm -v
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
+newgrp docker  # or log out and back in
+sudo systemctl enable docker
 ```
 
-## 3. Configure PostgreSQL
+## 3. Install Docker Compose Plugin
 
 ```bash
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-
-sudo -u postgres psql -c "CREATE USER ksw WITH PASSWORD 'your_strong_password';"
-sudo -u postgres psql -c "CREATE DATABASE ksw_website OWNER ksw;"
-sudo -u postgres psql -c "ALTER USER ksw CREATEDB;"
-
-sudo sed -i 's/local\s\+all\s\+all\s\+peer/local   all             all                                     md5/' /etc/postgresql/16/main/pg_hba.conf
-sudo systemctl restart postgresql
+sudo apt install -y docker-compose-plugin
+docker compose version
 ```
 
-## 4. Clone & Configure App
+## 4. Clone the Repository
 
 ```bash
 sudo mkdir -p /var/www/kswtechzone
 sudo chown -R $USER:$USER /var/www/kswtechzone
-git clone https://github.com/kswtechzone/ksw-techzone.git /var/www/kswtechzone
+git clone <repo-url> /var/www/kswtechzone
 cd /var/www/kswtechzone
-
-# Environment file
-cat > .env << 'EOF'
-# Database
-DATABASE_URL="postgresql://ksw:your_strong_password@localhost:5432/ksw_website"
-
-# JWT
-JWT_SECRET="generate-with-openssl-rand-64-hex"
-
-# Next.js
-NEXT_PUBLIC_APP_URL="https://kswtechzone.com"
-NEXT_PUBLIC_API_URL="/api"
-NODE_ENV=production
-PORT=3000
-
-# SMTP — single Nodemailer for all outgoing email
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT=587
-SMTP_USER="techzoneksw@gmail.com"
-SMTP_PASS="your-app-password"
-SMTP_FROM="KSW TechZone <techzoneksw@gmail.com>"
-
-# Admin alert email (receives contact form notifications)
-ADMIN_EMAIL="er.sanjayks@gmail.com"
-
-# Public contact info (shown on contact page — should match where you want inquiries)
-NEXT_PUBLIC_CONTACT_EMAIL="hello@kswtechzone.com"
-NEXT_PUBLIC_CONTACT_PHONE="+977-9863198323"
-EOF
-
-pnpm install
-npx prisma generate
-npx prisma migrate deploy
-
-pnpm db:seed
 ```
 
-## 5. Build the App
+## 5. Configure Environment
 
 ```bash
-cd /var/www/kswtechzone
-pnpm run build
+cp .env.example .env
+nano .env
 ```
 
-## 6. Install pm2 & Start App
+Set:
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | `postgresql://ksw:<password>@postgres:5432/ksw_website` (host = Docker service name) |
+| `REDIS_URL` | `redis://redis:6379` |
+| `JWT_SECRET` | `openssl rand -hex 64` |
+| `SMTP_*` | Your SMTP credentials |
+| `POSTGRES_PASSWORD` | Same password used in `DATABASE_URL` |
+| `NEXT_PUBLIC_APP_URL` | `https://kswtechzone.com` |
+
+## 6. First-Time Launch
 
 ```bash
-sudo npm install -g pm2
-
-#for specific port
-#pm2 start node_modules/next/dist/bin/next --name "ksw-techzone" -- start -p 3008
-pm2 start pnpm --name ksw-techzone -- start
-pm2 save
-pm2 startup   # prints a command — run it to enable on reboot
+docker compose up -d postgres redis
+docker compose up -d frontend
+docker compose exec -T frontend npx prisma migrate deploy
+docker compose exec -T frontend npx prisma db seed
 ```
 
-## 7. Configure Nginx
+### SSL Certificate (First Time)
 
 ```bash
-sudo nano /etc/nginx/sites-available/kswtechzone
+# Stop nginx if running
+docker compose stop nginx
+
+# Run certbot manually to get the certificate
+docker compose run --rm certbot certonly --webroot -w /var/www/certbot \
+  -d kswtechzone.com -d www.kswtechzone.com \
+  --email admin@kswtechzone.com --agree-tos --no-eff-email
+
+# Start all services
+docker compose up -d
 ```
 
-```nginx
-server {
-    listen 80;
-    server_name kswtechzone.com www.kswtechzone.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-        proxy_buffering off;
-        proxy_read_timeout 60s;
-    }
-
-    location /api/ {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 60s;
-    }
-}
-```
+## 7. Deployment Script
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/kswtechzone /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
+chmod +x docker/scripts/deploy.sh
+./docker/scripts/deploy.sh
 ```
 
-## 8. SSL Certificate (Let's Encrypt)
-
-```bash
-sudo certbot --nginx -d kswtechzone.com -d www.kswtechzone.com
-sudo certbot renew --dry-run
-```
-
-## 9. Firewall
+## 8. Firewall
 
 ```bash
 sudo ufw default deny incoming
@@ -156,54 +100,69 @@ sudo ufw allow 443/tcp
 sudo ufw --force enable
 ```
 
-## 10. Deploy Updates
+## 9. Monitoring & Logs
+
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f frontend
+
+# Resource usage
+docker stats
+```
+
+## 10. Updates
 
 ```bash
 cd /var/www/kswtechzone
 git pull origin main
-pnpm install
-npx prisma generate
-npx prisma migrate deploy
-pnpm run build
-pm2 restart ksw-techzone
+./docker/scripts/deploy.sh
 ```
 
-## Email Architecture
+## 11. Backup & Restore
 
-The app uses a **single Nodemailer** instance (configured via `SMTP_*` env vars) for all outgoing email:
+### Backup
 
-| Purpose | Destination | Configuration |
-|---------|------------|---------------|
-| Admin login verification | User's email | `sendVerificationCode()` via SMTP |
-| Contact form notification | `ADMIN_EMAIL` | `sendContactNotification()` via SMTP, reply-to set to submitter |
-| Public contact display | Shown on page | `NEXT_PUBLIC_CONTACT_EMAIL` (env var) |
+```bash
+docker compose exec -T postgres pg_dump -U ksw ksw_website > backup-$(date +%Y%m%d).sql
+```
 
-No third-party email service (EmailJS, SendGrid, etc.) is needed — everything routes through the single SMTP transport.
+### Restore
+
+```bash
+cat backup.sql | docker compose exec -T postgres psql -U ksw -d ksw_website
+```
 
 ## Useful Commands
 
 ```bash
-# Logs
-pm2 logs ksw-techzone
-journalctl -u nginx --no-pager -n 50
+# Rebuild frontend (after code changes)
+docker compose up -d --build frontend
 
-# Status
-pm2 status
-sudo systemctl status nginx postgresql
+# Run migrations
+docker compose exec -T frontend npx prisma migrate deploy
 
-# Database backup
-pg_dump -U ksw ksw_website > /backup/ksw-$(date +%Y%m%d).sql
+# Open psql shell
+docker compose exec -T postgres psql -U ksw -d ksw_website
 
-# Restore
-psql -U ksw -d ksw_website < backup.sql
+# Renew SSL (automatic via certbot container every 12h)
+docker compose logs certbot
+
+# Clean up
+docker compose down
+docker system prune -a
 ```
 
 ## Security Checklist
 
 - [ ] All secrets in `.env` — never commit
 - [ ] `JWT_SECRET` generated with `openssl rand -hex 64`
-- [ ] PostgreSQL port (5432) blocked by UFW — only local access
+- [ ] PostgreSQL port (5432) bound only to `127.0.0.1`
+- [ ] Redis port (6379) bound only to `127.0.0.1`
 - [ ] SSH key-only authentication (`/etc/ssh/sshd_config`)
 - [ ] Fail2ban running: `sudo systemctl status fail2ban`
 - [ ] Regular backups: add cron job (`crontab -e`)
 - [ ] OS auto-updates: `sudo apt install unattended-upgrades`
+- [ ] Docker not exposed via TCP (no `-H tcp://` in daemon config)

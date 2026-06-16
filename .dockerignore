@@ -1,0 +1,12 @@
+.env
+.env.local
+.git
+.gitignore
+.next
+node_modules
+logs
+backups
+*.md
+*.log
+.cache
+tsconfig.tsbuildinfo
