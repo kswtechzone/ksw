@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Calendar, Clock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,9 +70,11 @@ export function BlogContent({ slug, title, category, author, date, readTime, con
 
             {image && (
               <div className="mb-8 rounded-2xl overflow-hidden">
-                <img
+                <Image
                   src={image}
                   alt={title}
+                  width={1200}
+                  height={675}
                   className="w-full aspect-video object-cover"
                 />
               </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { API } from '@/constants/api';
 import { Plus, Edit, Trash2, TrendingUp } from 'lucide-react';
@@ -15,12 +15,7 @@ export default function PricingPage() {
     setToken(t);
   }, []);
 
-  useEffect(() => {
-    if (token) fetchPlans();
-    else setLoading(false);
-  }, [token]);
-
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       const res = await fetch(API.PRICING, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -32,7 +27,12 @@ export default function PricingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) fetchPlans();
+    else setLoading(false);
+  }, [token, fetchPlans]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this pricing plan?')) return;

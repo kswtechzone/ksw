@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Upload, X, ImageIcon } from 'lucide-react';
 import { API } from '@/constants/api';
 
@@ -47,7 +48,7 @@ export function ImageUpload({ value, onChange, label = 'Image' }: ImageUploadPro
       <label className="block text-sm font-medium text-slate-700 mb-2">{label}</label>
       {value ? (
         <div className="relative rounded-xl overflow-hidden border border-slate-200 group">
-          <img src={value} alt="Preview" className="w-full h-40 object-cover" />
+          <Image src={value} alt="Preview" width={400} height={160} className="w-full h-40 object-cover" />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <button
               type="button"

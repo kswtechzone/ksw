@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { API } from '@/constants/api';
@@ -29,19 +29,7 @@ export default function EditPricingPage({ params }: { params: { id: string } }) 
     published: true,
   });
 
-  useEffect(() => {
-    const t = localStorage.getItem('adminToken');
-    setToken(t);
-    if (t) {
-      fetchPlan(t);
-      fetch(`${API.SERVICES}`, { headers: { 'Authorization': `Bearer ${t}` } })
-        .then(r => r.json())
-        .then(data => setServices(Array.isArray(data) ? data : []))
-        .catch(() => {});
-    }
-  }, [params.id]);
-
-  const fetchPlan = async (t: string) => {
+  const fetchPlan = useCallback(async (t: string) => {
     try {
       const res = await fetch(`${API.PRICING}/${params.id}`, {
         headers: { 'Authorization': `Bearer ${t}` }
@@ -72,7 +60,19 @@ export default function EditPricingPage({ params }: { params: { id: string } }) 
     } finally {
       setFetching(false);
     }
-  };
+  }, [params.id, router]);
+
+  useEffect(() => {
+    const t = localStorage.getItem('adminToken');
+    setToken(t);
+    if (t) {
+      fetchPlan(t);
+      fetch(`${API.SERVICES}`, { headers: { 'Authorization': `Bearer ${t}` } })
+        .then(r => r.json())
+        .then(data => setServices(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
+  }, [params.id, fetchPlan]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;

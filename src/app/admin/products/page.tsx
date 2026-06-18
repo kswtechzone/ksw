@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { API } from '@/constants/api';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
@@ -10,19 +11,12 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const t = localStorage.getItem('adminToken');
     setToken(t);
   }, []);
 
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    if (token) fetchProducts();
-    else setLoading(false);
-  }, [token]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const res = await fetch(API.PRODUCTS, {
         headers: { Authorization: `Bearer ${token}` },
@@ -34,7 +28,12 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) fetchProducts();
+    else setLoading(false);
+  }, [token, fetchProducts]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product?')) return;
@@ -105,7 +104,7 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {p.image && (
-                          <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                          <Image src={p.image} alt="" width={40} height={40} className="w-10 h-10 rounded-lg object-cover" />
                         )}
                         <div>
                           <span className="text-sm font-medium text-slate-900">{p.title}</span>

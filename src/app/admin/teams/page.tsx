@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { API } from '@/constants/api';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
@@ -10,19 +11,12 @@ export default function TeamsPage() {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const t = localStorage.getItem('adminToken');
     setToken(t);
   }, []);
 
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    if (token) fetchMembers();
-    else setLoading(false);
-  }, [token]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       const res = await fetch(API.TEAMS, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -34,7 +28,12 @@ export default function TeamsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) fetchMembers();
+    else setLoading(false);
+  }, [token, fetchMembers]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this team member?')) return;
@@ -97,7 +96,7 @@ export default function TeamsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {m.image && (
-                          <img src={m.image} alt={m.name} className="h-8 w-8 rounded-full object-cover" />
+                          <Image src={m.image} alt={m.name} width={32} height={32} className="h-8 w-8 rounded-full object-cover" />
                         )}
                         <span className="text-sm font-medium text-slate-900">{m.name}</span>
                       </div>

@@ -1,7 +1,7 @@
 import pino from 'pino';
 
 const isDev = process.env.NODE_ENV !== 'production';
-const isEdge = typeof globalThis.EdgeRuntime === 'string';
+const isEdge = typeof (globalThis as Record<string, unknown>).EdgeRuntime === 'string';
 
 const options: pino.LoggerOptions = {
   level: process.env.LOG_LEVEL || (isDev ? 'debug' : 'info'),
