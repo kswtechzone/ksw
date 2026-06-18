@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import logger from '@/lib/logger';
 
 function getTransporter() {
   const host = process.env.SMTP_HOST;
@@ -27,7 +26,7 @@ export async function sendVerificationCode(
   const transporter = getTransporter();
 
   if (!transporter) {
-    logger.warn({ email, code }, 'SMTP not configured, verification code not sent')
+    console.warn('SMTP not configured, verification code not sent')
     return false;
   }
 
@@ -55,10 +54,10 @@ export async function sendVerificationCode(
       `,
     });
 
-    logger.info({ email }, 'Verification code sent')
+    console.log('Verification code sent to', email)
     return true;
   } catch (error) {
-    logger.error({ err: error }, 'Failed to send verification code')
+    console.error('Failed to send verification code:', error)
     return false;
   }
 }
@@ -69,7 +68,7 @@ export async function sendContactNotification(
   const transporter = getTransporter();
 
   if (!transporter) {
-    logger.warn('SMTP not configured, contact notification not sent')
+    console.warn('SMTP not configured, contact notification not sent')
     return false;
   }
 
@@ -117,10 +116,10 @@ export async function sendContactNotification(
       `,
     });
 
-    logger.info({ name: contact.name }, 'Contact notification sent')
+    console.log('Contact notification sent for', contact.name)
     return true;
   } catch (error) {
-    logger.error({ err: error }, 'Failed to send contact notification')
+    console.error('Failed to send contact notification:', error)
     return false;
   }
 }

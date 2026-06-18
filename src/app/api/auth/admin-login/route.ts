@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { sendVerificationCode } from '@/lib/email';
-import logger from '@/lib/logger';
 import { apiHandler, createApiError } from '@/lib/api-handler';
 import { createAuditLog } from '@/lib/audit-log';
 
@@ -123,7 +122,7 @@ export const POST = apiHandler<LoginResponse>(async (req: Request) => {
     }
 
     if (!emailSent) {
-      logger.warn({ username }, 'Verification code (email not sent)');
+      console.warn('Verification code not sent to', username);
     }
 
     return NextResponse.json({

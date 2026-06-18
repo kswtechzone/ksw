@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import logger from '@/lib/logger';
 import { apiHandler, createApiError } from '@/lib/api-handler';
 
 const ALLOWED_TYPES: Record<string, string[]> = {
@@ -48,7 +47,7 @@ export const POST = apiHandler(async (req: Request) => {
 
   await writeFile(filepath, buffer);
 
-  logger.info({ filename, size: file.size, type: file.type }, 'File uploaded');
+  console.log('File uploaded:', filename, file.size, file.type);
   return NextResponse.json({
     url: `/uploads/${filename}`,
     message: 'Upload successful',

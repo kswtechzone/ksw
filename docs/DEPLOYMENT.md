@@ -91,7 +91,7 @@ pm2 startup   # (follow the printed command to enable on boot)
 
 ```bash
 sudo certbot --nginx -d kswtechzone.com -d www.kswtechzone.com \
-  --email admin@kswtechzone.com --agree-tos --no-eff-email
+  --email kswtechzone@gmail.com --agree-tos --no-eff-email
 ```
 
 ### Nginx Configuration

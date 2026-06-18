@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import logger from '@/lib/logger';
 
 type Handler<T = unknown, P extends Record<string, string> = Record<string, string>> = (
   req: Request,
@@ -23,12 +22,7 @@ export function apiHandler<T, P extends Record<string, string> = Record<string, 
       const response = await handler(req, context);
 
       const duration = Math.round(performance.now() - start);
-      logger.info({
-        method: req.method,
-        path: url.pathname,
-        status: response.status,
-        duration,
-      }, `${req.method} ${url.pathname} ${response.status} ${duration}ms`);
+      console.log(`${req.method} ${url.pathname} ${response.status} ${duration}ms`);
 
       return response;
     } catch (error) {
@@ -37,15 +31,7 @@ export function apiHandler<T, P extends Record<string, string> = Record<string, 
       const status = err.status || 500;
       const message = err.message || 'Internal server error';
 
-      logger.error({
-        method: req.method,
-        path: url.pathname,
-        status,
-        duration,
-        err: error instanceof Error
-          ? { message: error.message, stack: error.stack, name: error.name }
-          : error,
-      }, `${req.method} ${url.pathname} ${status} ${duration}ms - ${message}`);
+      console.error(`${req.method} ${url.pathname} ${status} ${duration}ms - ${message}`);
 
       if (status >= 500) {
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 }) as NextResponse<T>;

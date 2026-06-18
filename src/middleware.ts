@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limiter';
-import logger from '@/lib/logger';
 
 const publicPaths = [
   '/',
@@ -113,7 +112,7 @@ export async function middleware(request: NextRequest) {
   response.headers.set('X-RateLimit-Reset', String(Math.ceil(rateResult.resetAt / 1000)));
 
   if (!rateResult.allowed) {
-    logger.warn({ method: request.method, path: pathname, status: 429, duration: Math.round(performance.now() - start), ip, ua: request.headers.get('user-agent') || '' }, 'Rate limit exceeded');
+    console.warn('Rate limit exceeded:', request.method, pathname);
     return new NextResponse('Too Many Requests', {
       status: 429,
       headers: {
@@ -123,7 +122,7 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  logger.debug({ method: request.method, path: pathname, status: response.status, duration: Math.round(performance.now() - start) }, `${request.method} ${pathname}`);
+  console.log(`${request.method} ${pathname}`);
 
   const isPublic = publicPaths.some(
     (path) => pathname === path || pathname.startsWith(path + '/')
