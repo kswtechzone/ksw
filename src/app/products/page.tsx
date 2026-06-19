@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Building2, Globe, Clock, Megaphone, Cpu, Package as PackageIcon, ExternalLink, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 import { API } from '@/constants/api';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -30,6 +31,7 @@ interface Product {
   description: string;
   icon?: string;
   features: string[];
+  image?: string;
   status: string;
   url?: string;
   order: number;
@@ -88,9 +90,15 @@ export default function ProductsPage() {
                   <div className="flex flex-col lg:flex-row gap-12">
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-6">
-                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center`}>
-                          <Icon className="h-8 w-8 text-white" />
-                        </div>
+                        {product.image ? (
+                          <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                            <Image src={product.image} alt={product.title} width={64} height={64} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
+                            <Icon className="h-8 w-8 text-white" />
+                          </div>
+                        )}
                         <div>
                           <h2 className="text-3xl font-bold">{product.title}</h2>
                           {product.tagline && (
@@ -124,9 +132,15 @@ export default function ProductsPage() {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <div className="aspect-[16/10] rounded-2xl border bg-gradient-to-br from-ksw-500/5 to-background flex items-center justify-center">
-                        <Icon className="h-40 w-40 text-ksw-500/20" />
-                      </div>
+                      {product.image ? (
+                        <div className="aspect-[16/10] rounded-2xl overflow-hidden border">
+                          <Image src={product.image} alt={product.title} width={800} height={500} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="aspect-[16/10] rounded-2xl border bg-gradient-to-br from-ksw-500/5 to-background flex items-center justify-center">
+                          <Icon className="h-40 w-40 text-ksw-500/20" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>

@@ -61,7 +61,7 @@ export const POST = apiHandler<LoginResponse>(async (req: Request) => {
     });
 
     const token = jwt.sign(
-      { id: admin.id, username: admin.username },
+      { id: admin.id, username: admin.username, role: (admin as { role?: string }).role || 'ADMIN' },
       JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -134,7 +134,7 @@ export const POST = apiHandler<LoginResponse>(async (req: Request) => {
   }
 
   const token = jwt.sign(
-    { id: admin.id, username: admin.username },
+    { id: admin.id, username: admin.username, role: (admin as { role?: string }).role || 'ADMIN' },
     JWT_SECRET,
     { expiresIn: '1d' }
   );

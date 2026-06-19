@@ -17,8 +17,8 @@ interface ServiceItem {
   slug: string;
 }
 
-const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@kswtechzone.com';
-const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+977-9863198323';
+const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'kswtechzone@gmail.com';
+const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+1-7378995283';
 
 const contactInfo = [
   { icon: Mail, label: 'Email', value: contactEmail, href: `mailto:${contactEmail}` },
@@ -51,7 +51,7 @@ export default function ContactPage() {
     fetch(API.SERVICES)
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setServices(data); })
-      .catch(() => {});
+      .catch(() => { });
 
     const { preselected, plans } = parsePreselectedServices();
     if (preselected.length > 0) {
@@ -229,17 +229,15 @@ export default function ContactPage() {
                               key={s.id}
                               type="button"
                               onClick={() => toggleService(s.title)}
-                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm text-left transition-all ${
-                                selected
+                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-sm text-left transition-all ${selected
                                   ? 'border-ksw-500 bg-ksw-500/10 text-ksw-700 dark:text-ksw-300'
                                   : 'border-border bg-background hover:border-ksw-300'
-                              }`}
+                                }`}
                             >
-                              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-                                selected
+                              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${selected
                                   ? 'border-ksw-500 bg-ksw-500'
                                   : 'border-muted-foreground/30'
-                              }`}>
+                                }`}>
                                 {selected && <Check className="h-3 w-3 text-white" />}
                               </div>
                               {s.title}
@@ -282,11 +280,10 @@ export default function ContactPage() {
                         {selectedServices.map(s => (
                           <span
                             key={s}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm ${
-                              services.some(svc => svc.title === s)
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm ${services.some(svc => svc.title === s)
                                 ? 'bg-primary/10 text-primary'
                                 : 'bg-muted text-muted-foreground border border-dashed border-muted-foreground/30'
-                            }`}
+                              }`}
                           >
                             {s}
                             <button

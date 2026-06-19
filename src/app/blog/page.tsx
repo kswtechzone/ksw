@@ -23,7 +23,7 @@ export default function BlogPage() {
   React.useEffect(() => {
     fetch(API.BLOGS)
       .then(r => r.json())
-      .then(data => { setPosts(data); setLoading(false); })
+      .then(data => { setPosts(data.filter((p: any) => p.published)); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 

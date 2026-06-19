@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowLeft,
   Code2, Globe, Smartphone, Megaphone, Cloud,
@@ -87,9 +88,15 @@ export function ServiceContent({ service }: { service: Service }) {
             </Button>
 
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-ksw-400 to-ksw-600 flex items-center justify-center">
-                <Icon className="h-8 w-8 text-white" />
-              </div>
+              {service.image ? (
+                <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                  <Image src={service.image} alt={service.title} width={64} height={64} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-ksw-400 to-ksw-600 flex items-center justify-center shrink-0">
+                  <Icon className="h-8 w-8 text-white" />
+                </div>
+              )}
               <div>
                 <h1 className="text-4xl font-bold">{service.title}</h1>
               </div>
@@ -126,6 +133,8 @@ export function ServiceContent({ service }: { service: Service }) {
         </div>
       </section>
 
+      <PricingSection serviceSlug={slug} serviceTitle={service.title} />
+
       {related.length > 0 && (
         <section className="py-16 bg-muted/30">
           <div className="container max-w-4xl">
@@ -158,8 +167,6 @@ export function ServiceContent({ service }: { service: Service }) {
           </div>
         </section>
       )}
-
-      <PricingSection serviceSlug={slug} serviceTitle={service.title} />
 
       <div className="h-4" />
     </div>

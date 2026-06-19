@@ -6,6 +6,7 @@ const nextConfig = {
   },
   reactStrictMode: true,
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: 'kswtechzone.com' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },

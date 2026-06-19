@@ -93,7 +93,7 @@ export default async function BlogPostPage({ params }: Props) {
     }
   }
 
-  if (!post || !post.published) notFound();
+  if (!post) notFound();
 
   const readTime = Math.max(1, Math.ceil((post.content?.length || 0) / 1500)) + ' min read';
 

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
 import { TiltCard } from '@/components/ui/tilt-card';
 import {
@@ -45,6 +46,7 @@ interface ServiceItem {
   title: string;
   slug: string;
   icon?: string;
+  image?: string;
   description: string;
 }
 
@@ -90,7 +92,7 @@ export function ServicesOverview() {
             initial="hidden"
             animate={isInView ? 'visible' : 'hidden'}
           >
-            {services.map(({ id, title, icon, slug, description }, idx) => {
+            {services.map(({ id, title, icon, image, slug, description }, idx) => {
               const Icon = iconMap[icon || ''] || Code2;
               return (
                 <motion.div
@@ -99,9 +101,15 @@ export function ServicesOverview() {
                   className={`${idx >= 3 ? 'hidden sm:block' : ''}`}
                 >
                   <TiltCard className="group relative rounded-xl border bg-card/50 backdrop-blur-sm p-6 hover:shadow-lg hover:shadow-ksw-500/5">
-                  <div className="h-12 w-12 rounded-lg bg-ksw-500/10 flex items-center justify-center mb-4 group-hover:bg-ksw-500/20 transition-colors">
-                    <Icon className="h-6 w-6 text-ksw-500" />
-                  </div>
+                  {image ? (
+                    <div className="h-12 w-12 rounded-lg overflow-hidden mb-4">
+                      <Image src={image} alt={title} width={48} height={48} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="h-12 w-12 rounded-lg bg-ksw-500/10 flex items-center justify-center mb-4 group-hover:bg-ksw-500/20 transition-colors">
+                      <Icon className="h-6 w-6 text-ksw-500" />
+                    </div>
+                  )}
                   <h3 className="text-lg font-semibold mb-2">{title}</h3>
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                     {description}

@@ -143,25 +143,9 @@ export async function middleware(request: NextRequest) {
       const { jwtVerify } = await import('jose');
       const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-key-change-in-production');
       const { payload } = await jwtVerify(adminCookie.value, secret);
-      const adminId = payload.sub as string;
 
-      if (adminId) {
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-        const admin = await (prisma as any).admin.findUnique({
-          where: { id: adminId },
-        });
-        await prisma.$disconnect();
-
-        const isActive = admin ? (admin as any).isActive !== false : false;
-        if (!admin || !isActive) {
-          const loginUrl = new URL('/admin/login', request.url);
-          const redirectResponse = NextResponse.redirect(loginUrl);
-          redirectResponse.cookies.set('auth_token', '', { maxAge: 0, path: '/' });
-          return redirectResponse;
-        }
-
-        response.headers.set('X-Admin-Role', (admin as any).role || 'ADMIN');
+      if (payload.role) {
+        response.headers.set('X-Admin-Role', payload.role as string);
       }
     } catch {
       const loginUrl = new URL('/admin/login', request.url);

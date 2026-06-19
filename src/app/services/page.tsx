@@ -10,6 +10,7 @@ import {
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { API } from '@/constants/api';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -75,9 +76,15 @@ export default function ServicesPage() {
                 className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
               >
                 <div>
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-ksw-400 to-ksw-600 flex items-center justify-center mb-6">
-                    <Icon className="h-8 w-8 text-white" />
-                  </div>
+                  {service.image ? (
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden mb-6">
+                      <Image src={service.image} alt={service.title} width={64} height={64} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-ksw-400 to-ksw-600 flex items-center justify-center mb-6">
+                      <Icon className="h-8 w-8 text-white" />
+                    </div>
+                  )}
                   <h2 className="text-3xl font-bold mb-4">{service.title}</h2>
                   <p className="text-muted-foreground mb-6">{service.description}</p>
                   <ul className="grid grid-cols-2 gap-3">
@@ -96,9 +103,15 @@ export default function ServicesPage() {
                     </Button>
                   </div>
                 <div className="relative">
-                  <div className="aspect-[4/3] rounded-2xl border bg-gradient-to-br from-ksw-500/5 to-background flex items-center justify-center">
-                    <Icon className="h-32 w-32 text-ksw-500/20" />
-                  </div>
+                  {service.image ? (
+                    <div className="aspect-[4/3] rounded-2xl overflow-hidden border">
+                      <Image src={service.image} alt={service.title} width={600} height={450} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-[4/3] rounded-2xl border bg-gradient-to-br from-ksw-500/5 to-background flex items-center justify-center">
+                      <Icon className="h-32 w-32 text-ksw-500/20" />
+                    </div>
+                  )}
                   <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-ksw-500/10 rounded-full blur-3xl" />
                 </div>
               </motion.div>
